@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berth</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080e1a;
+      --surface: #0f1829;
+      --surface2: #162035;
+      --border: #1e2d47;
+      --text: #c8d8f0;
+      --muted: #4a6080;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.15);
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --radius: 10px;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 14px; min-height: 100vh; }
+
+    /* Layout */
+    .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+    /* Sidebar */
+    aside { background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem 0; display: flex; flex-direction: column; }
+    .logo { padding: 0 1.25rem 1.5rem; border-bottom: 1px solid var(--border); }
+    .logo h1 { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: -0.02em; }
+    .logo span { font-size: 0.7rem; color: var(--muted); display: block; margin-top: 2px; }
+    nav { padding: 1rem 0.75rem; flex: 1; }
+    .nav-section { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0.5rem 0.5rem 0.25rem; }
+    .nav-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.5rem; border-radius: 6px; cursor: pointer; color: var(--muted); transition: all 0.15s; font-size: 0.85rem; }
+    .nav-item:hover, .nav-item.active { background: var(--accent-glow); color: var(--text); }
+    .nav-item.active { color: var(--accent); }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-yellow { background: var(--yellow); }
+    .dot-red { background: var(--red); }
+    .dot-grey { background: var(--muted); }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+    .sidebar-footer a { font-size: 0.75rem; color: var(--muted); text-decoration: none; }
+    .sidebar-footer a:hover { color: var(--accent); }
+
+    /* Main */
+    main { padding: 2rem; overflow-y: auto; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+    .page-header h2 { font-size: 1.2rem; font-weight: 600; }
+    .refresh-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.4rem 0.875rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.15s; }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Summary strip */
+    .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+    .stat .val { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+    .stat .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .val-green { color: var(--green); }
+    .val-yellow { color: var(--yellow); }
+    .val-red { color: var(--red); }
+
+    /* Project cards */
+    .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1.25rem; overflow: hidden; }
+    .project-header { padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+    .project-header:hover { background: var(--surface2); }
+    .project-name { font-weight: 600; font-size: 0.95rem; }
+    .project-desc { font-size: 0.75rem; color: var(--muted); flex: 1; }
+    .chevron { color: var(--muted); transition: transform 0.2s; font-size: 0.75rem; }
+    .chevron.open { transform: rotate(90deg); }
+    .env-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+    .env-tab { padding: 0.5rem 1rem; font-size: 0.75rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all 0.15s; }
+    .env-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .services-table { width: 100%; border-collapse: collapse; }
+    .services-table th { text-align: left; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0.6rem 1.25rem; background: var(--surface2); }
+    .services-table td { padding: 0.7rem 1.25rem; border-top: 1px solid var(--border); font-size: 0.82rem; }
+    .services-table tr:hover td { background: var(--surface2); }
+    .svc-name { font-weight: 500; }
+    .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 500; }
+    .badge-green { background: rgba(34,197,94,0.12); color: var(--green); }
+    .badge-yellow { background: rgba(234,179,8,0.12); color: var(--yellow); }
+    .badge-red { background: rgba(239,68,68,0.12); color: var(--red); }
+    .badge-grey { background: rgba(74,96,128,0.2); color: var(--muted); }
+    a.url { color: var(--accent); text-decoration: none; font-size: 0.78rem; }
+    a.url:hover { text-decoration: underline; }
+    .port-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 0.1rem 0.4rem; font-size: 0.7rem; font-family: monospace; color: var(--muted); }
+    .action-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 0.2rem 0.6rem; border-radius: 5px; cursor: pointer; font-size: 0.7rem; transition: all 0.15s; }
+    .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .history-btn { color: var(--muted); background: none; border: none; cursor: pointer; font-size: 0.7rem; text-decoration: underline; }
+    .history-btn:hover { color: var(--text); }
+
+    /* History drawer */
+    .history-panel { background: var(--surface2); border-top: 1px solid var(--border); padding: 1rem 1.25rem; }
+    .history-panel h4 { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.75rem; }
+    .release-row { display: flex; align-items: center; gap: 1rem; padding: 0.35rem 0; border-top: 1px solid var(--border); font-size: 0.78rem; }
+    .release-row:first-child { border-top: none; }
+    .release-ver { font-weight: 600; width: 60px; }
+    .release-time { color: var(--muted); flex: 1; }
+    .release-sha { font-family: monospace; font-size: 0.7rem; color: var(--muted); }
+    .current-tag { background: rgba(59,130,246,0.15); color: var(--accent); padding: 0.1rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
+
+    /* Empty / loading */
+    .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .loading { color: var(--muted); font-size: 0.85rem; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="logo">
+      <h1>⚓ Berth</h1>
+      <span>Local deployment manager</span>
+    </div>
+    <nav>
+      <div class="nav-section">Views</div>
+      <div class="nav-item active" onclick="showView('all')">
+        <span>All Projects</span>
+      </div>
+      <div id="project-nav"></div>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="http://localhost:8080" target="_blank">Traefik dashboard →</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-header">
+      <h2 id="page-title">All Projects</h2>
+      <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+    </div>
+
+    <div class="summary" id="summary">
+      <div class="stat"><div class="val" id="s-projects">—</div><div class="lbl">Projects</div></div>
+      <div class="stat"><div class="val val-green" id="s-running">—</div><div class="lbl">Running</div></div>
+      <div class="stat"><div class="val val-yellow" id="s-degraded">—</div><div class="lbl">Unhealthy</div></div>
+      <div class="stat"><div class="val val-red" id="s-stopped">—</div><div class="lbl">Stopped</div></div>
+    </div>
+
+    <div id="projects-area"><div class="loading">Loading…</div></div>
+  </main>
+</div>
+
+<script>
+let state = { projects: [] };
+
+async function load() {
+  try {
+    const r = await fetch('/api/projects');
+    const data = await r.json();
+    state.projects = data.projects;
+    render();
+  } catch(e) {
+    document.getElementById('projects-area').innerHTML =
+      '<div class="empty">Could not reach the Berth API.</div>';
+  }
+}
+
+function healthBadge(h) {
+  if (h === 'running' || h === 'healthy') return `<span class="badge badge-green">● ${h}</span>`;
+  if (h === 'unhealthy') return `<span class="badge badge-red">● unhealthy</span>`;
+  if (h === 'starting') return `<span class="badge badge-yellow">● starting</span>`;
+  return `<span class="badge badge-grey">● ${h || 'stopped'}</span>`;
+}
+
+function dotClass(services) {
+  if (!services.length) return 'dot-grey';
+  if (services.every(s => s.health === 'running' || s.health === 'healthy')) return 'dot-green';
+  if (services.some(s => s.health === 'running' || s.health === 'healthy')) return 'dot-yellow';
+  return 'dot-red';
+}
+
+function render() {
+  const projects = state.projects;
+
+  // Summary stats
+  const allSvcs = projects.flatMap(p => p.services);
+  const running = allSvcs.filter(s => s.health === 'running' || s.health === 'healthy').length;
+  const unhealthy = allSvcs.filter(s => s.health === 'unhealthy').length;
+  const stopped = allSvcs.filter(s => s.health === 'stopped' || !s.health).length;
+  document.getElementById('s-projects').textContent = projects.length;
+  document.getElementById('s-running').textContent = running;
+  document.getElementById('s-degraded').textContent = unhealthy;
+  document.getElementById('s-stopped').textContent = stopped;
+
+  // Sidebar nav
+  document.getElementById('project-nav').innerHTML = projects.map(p => `
+    <div class="nav-item" onclick="showView('${p.slug}')">
+      <span class="dot ${dotClass(p.services)}"></span>
+      <span>${p.slug}</span>
+    </div>`).join('');
+
+  // Project cards
+  if (!projects.length) {
+    document.getElementById('projects-area').innerHTML =
+      '<div class="empty">No projects registered.<br><br>Run <code>berth register &lt;path&gt;</code> to add one.</div>';
+    return;
+  }
+
+  document.getElementById('projects-area').innerHTML = projects.map(p => renderProject(p)).join('');
+}
+
+function renderProject(p) {
+  const envs = [...new Set(p.services.map(s => s.env))];
+  const firstEnv = envs[0] || 'local';
+
+  return `
+  <div class="project-card" id="proj-${p.slug}">
+    <div class="project-header" onclick="toggleProject('${p.slug}')">
+      <span class="dot ${dotClass(p.services)}"></span>
+      <span class="project-name">${p.slug}</span>
+      <span class="project-desc">${p.description || ''}</span>
+      <span class="chevron open" id="chev-${p.slug}">▶</span>
+    </div>
+    <div id="body-${p.slug}">
+      ${envs.length > 1 ? `<div class="env-tabs">${envs.map(e =>
+        `<div class="env-tab ${e===firstEnv?'active':''}" onclick="switchEnv('${p.slug}','${e}',this)">${e}</div>`
+      ).join('')}</div>` : ''}
+      ${renderServicesTable(p, firstEnv)}
+    </div>
+  </div>`;
+}
+
+function renderServicesTable(p, env) {
+  const svcs = p.services.filter(s => s.env === env);
+  if (!svcs.length) return '<div style="padding:1rem 1.25rem;color:var(--muted);font-size:0.8rem">No services in this environment.</div>';
+
+  return `
+  <table class="services-table">
+    <thead><tr>
+      <th>Service</th><th>Version</th><th>URL</th><th>Health</th><th>Port</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+      ${svcs.map(s => `
+      <tr>
+        <td class="svc-name">${s.service}</td>
+        <td>${s.version}</td>
+        <td>${s.url ? `<a class="url" href="${s.url}" target="_blank">${s.url}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>${healthBadge(s.health)}</td>
+        <td>${s.host_port ? `<span class="port-tag">:${s.host_port}</span>` : '—'}</td>
+        <td style="display:flex;gap:0.4rem;align-items:center">
+          ${s.container_name ? `<button class="action-btn" onclick="restart('${p.slug}','${s.service}','${env}')">restart</button>` : ''}
+          <button class="history-btn" onclick="toggleHistory('${p.slug}','${s.service}','${env}',this)">history</button>
+        </td>
+      </tr>
+      <tr id="hist-${p.slug}-${s.service}-${env}" class="hidden">
+        <td colspan="6" style="padding:0"><div class="history-panel" id="hist-body-${p.slug}-${s.service}-${env}"></div></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function toggleProject(slug) {
+  const body = document.getElementById(`body-${slug}`);
+  const chev = document.getElementById(`chev-${slug}`);
+  const hidden = body.classList.toggle('hidden');
+  chev.classList.toggle('open', !hidden);
+}
+
+function switchEnv(slug, env, tab) {
+  tab.closest('.project-card').querySelectorAll('.env-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const p = state.projects.find(x => x.slug === slug);
+  const body = document.getElementById(`body-${slug}`);
+  const tabs = body.querySelector('.env-tabs');
+  body.innerHTML = '';
+  if (tabs) body.appendChild(tabs);
+  body.insertAdjacentHTML('beforeend', renderServicesTable(p, env));
+}
+
+async function toggleHistory(project, service, env, btn) {
+  const row = document.getElementById(`hist-${project}-${service}-${env}`);
+  const body = document.getElementById(`hist-body-${project}-${service}-${env}`);
+  if (!row.classList.contains('hidden')) { row.classList.add('hidden'); return; }
+
+  body.innerHTML = '<div class="loading">Loading history…</div>';
+  row.classList.remove('hidden');
+
+  const r = await fetch(`/api/projects/${project}/history/${service}?env=${env}`);
+  const data = await r.json();
+  const releases = data.releases;
+  if (!releases.length) { body.innerHTML = '<h4>Release history</h4><div style="color:var(--muted);font-size:0.78rem">No releases yet.</div>'; return; }
+
+  body.innerHTML = `<h4>Release history</h4>` + releases.map(r => `
+    <div class="release-row">
+      <span class="release-ver">v${r.version}</span>
+      ${r.current ? '<span class="current-tag">current</span>' : ''}
+      <span class="release-sha">${r.git_sha !== '—' ? r.git_sha : ''}</span>
+      <span class="release-time">${r.deployed_at ? new Date(r.deployed_at).toLocaleString() : ''}</span>
+    </div>`).join('');
+}
+
+async function restart(project, service, env) {
+  if (!confirm(`Restart ${project}/${service} (${env})?`)) return;
+  const r = await fetch(`/api/projects/${project}/services/${service}/restart?env=${env}`, {method:'POST'});
+  if (r.ok) { setTimeout(load, 1500); }
+  else { alert('Restart failed'); }
+}
+
+function showView(v) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (v === 'all') {
+    document.getElementById('page-title').textContent = 'All Projects';
+    document.querySelectorAll('.project-card').forEach(el => el.classList.remove('hidden'));
+    document.querySelector('.nav-item').classList.add('active');
+  } else {
+    document.getElementById('page-title').textContent = v;
+    document.querySelectorAll('.project-card').forEach(el => {
+      el.classList.toggle('hidden', el.id !== `proj-${v}`);
+    });
+  }
+}
+
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>

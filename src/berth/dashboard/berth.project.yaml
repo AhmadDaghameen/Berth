@@ -1,0 +1,20 @@
+project: berth-dashboard
+description: "Berth management dashboard"
+
+environments:
+  - local
+
+services:
+  web:
+    type: dockerfile
+    context: .
+    container_port: 8000
+    hostname_override: berth.test
+    healthcheck:
+      path: /api/health
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - /root/.berth:/berth-data:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro

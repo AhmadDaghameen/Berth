@@ -1,0 +1,17 @@
+# berth.project.yaml — Phase 1 demo project
+project: demo
+description: "Berth Phase 1 demo — simple HTTP echo server"
+
+environments:
+  - local
+
+services:
+  app:
+    type: dockerfile
+    context: .
+    container_port: 8000
+    route: app
+    default_route: true
+    healthcheck:
+      path: /health
+      interval: 5s

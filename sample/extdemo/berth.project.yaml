@@ -1,0 +1,37 @@
+# ExtDemo — demonstrates static + external service types.
+#
+# `static` serves a pre-built directory via nginx:alpine (no Dockerfile needed).
+# `external` adds a Traefik route to a process already running on the host
+#             (e.g. `python -m http.server 9000`).
+#
+# Run the external API first:
+#   python3 -m http.server 9000
+# Then:
+#   berth register sample/extdemo
+#   berth up extdemo
+
+project: extdemo
+description: "Demonstrates static + external service types"
+
+environments:
+  - local
+
+services:
+  web:
+    type: static
+    context: static            # serve this directory via nginx:alpine
+    container_port: 80
+    route: app
+    default_route: true
+    healthcheck:
+      path: /
+      interval: 5s
+      timeout: 2s
+      retries: 3
+
+  api:
+    type: external
+    host: host.docker.internal  # resolves to the Windows/Mac host from inside Docker
+    port: 9000
+    scheme: http
+    route: api

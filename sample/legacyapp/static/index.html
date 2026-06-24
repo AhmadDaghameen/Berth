@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegacyApp — Berth</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; padding: 2rem; }
+    h1 { font-size: 2rem; font-weight: 700; }
+    h1 span { color: #a78bfa; }
+    .badge { display: inline-block; padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; background: #2e1065; color: #c4b5fd; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem 2rem; max-width: 500px; width: 100%; }
+    .card h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 0.75rem; }
+    .card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
+    code { background: #0f172a; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.85em; color: #a78bfa; }
+  </style>
+</head>
+<body>
+  <div style="text-align:center">
+    <h1>Legacy<span>App</span></h1>
+    <span class="badge">type: compose</span>
+  </div>
+
+  <div class="card">
+    <h2>How it works</h2>
+    <p>
+      The existing <code>docker-compose.yml</code> (Postgres + Redis) was imported
+      via <code>type: compose</code> in <code>berth.project.yaml</code>. Berth
+      attached both services to <code>berth-net</code> with no changes to the
+      original file. This page is served by a <code>type: static</code> nginx container.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Service topology</h2>
+    <p>
+      <strong style="color:#e2e8f0">db</strong> — Postgres 16 on <code>legacyapp-db:5432</code><br>
+      <strong style="color:#e2e8f0">cache</strong> — Redis 7 on <code>legacyapp-cache:6379</code><br>
+      <strong style="color:#e2e8f0">web</strong> — nginx static at <code>https://app.legacyapp.test</code>
+    </p>
+  </div>
+</body>
+</html>

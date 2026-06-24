@@ -1,0 +1,33 @@
+# LegacyApp — demonstrates the `compose` service type.
+#
+# Projects that already have a docker-compose.yml can be onboarded without
+# rewriting anything. Berth merges the existing services into berth-net and
+# adds a routed frontend on top.
+#
+#   berth register sample/legacyapp
+#   berth up legacyapp
+
+project: legacyapp
+description: "Demonstrates compose service type — import existing docker-compose.yml"
+
+environments:
+  - local
+
+services:
+  # Import the existing docker-compose.yml — its services become berth-net members.
+  stack:
+    type: compose
+    context: .   # directory containing docker-compose.yml
+
+  # A lightweight routed frontend served directly by Berth.
+  web:
+    type: static
+    context: static
+    container_port: 80
+    route: app
+    default_route: true
+    healthcheck:
+      path: /
+      interval: 5s
+      timeout: 2s
+      retries: 3

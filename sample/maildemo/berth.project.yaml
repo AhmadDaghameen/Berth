@@ -1,0 +1,33 @@
+# MailDemo — demonstrates the `uses:` directive for shared services.
+#
+# `uses: [mailpit]` tells Berth to auto-start Mailpit before the project comes up.
+# Mailpit will be accessible at https://mail.test (web UI) and smtp://localhost:1025.
+#
+#   berth register sample/maildemo
+#   berth up maildemo
+#   # Opens https://app.maildemo.test and auto-starts https://mail.test
+
+project: maildemo
+description: "Demonstrates the uses: directive — auto-starts Mailpit shared service"
+
+environments:
+  - local
+
+uses:
+  - mailpit   # auto-start Mailpit before this project's containers
+
+services:
+  web:
+    type: dockerfile
+    context: .
+    container_port: 8000
+    route: app
+    default_route: true
+    env:
+      SMTP_HOST: berth-shared-mailpit
+      SMTP_PORT: "1025"
+    healthcheck:
+      path: /health
+      interval: 5s
+      timeout: 2s
+      retries: 3

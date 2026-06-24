@@ -1,0 +1,59 @@
+# berth.project.yaml — FinanceIQ sample (Phase 2 acceptance demo)
+project: financeiq
+description: "Financial analytics platform — Berth multi-service demo"
+
+environments:
+  - local
+
+services:
+  db:
+    type: docker-image
+    image: postgres:16-alpine
+    container_port: 5432
+    expose_host_port: true     # stable host port for psql / DBeaver
+    env:
+      POSTGRES_USER: financeiq
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: financeiq
+    volumes:
+      - financeiq-db-data:/var/lib/postgresql/data
+
+  backend:
+    type: dockerfile
+    context: ./api
+    container_port: 8000
+    route: api                 # -> https://api.financeiq.test
+    depends_on:
+      - db
+    env:
+      DATABASE_URL: postgresql://financeiq:localdev@berth-financeiq-db-1:5432/financeiq
+    healthcheck:
+      path: /health
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    hooks:
+      post_deploy: "python manage_db.py upgrade"
+
+  worker:
+    type: dockerfile
+    context: ./api
+    command: ["python", "worker.py"]
+    depends_on:
+      - db
+    env:
+      DATABASE_URL: postgresql://financeiq:localdev@berth-financeiq-db-1:5432/financeiq
+
+  frontend:
+    type: dockerfile
+    context: ./web
+    container_port: 80
+    route: app
+    default_route: true        # bare https://financeiq.test also works
+    depends_on:
+      - backend
+    healthcheck:
+      path: /
+      interval: 5s
+      timeout: 3s
+      retries: 3

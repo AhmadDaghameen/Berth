@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinanceIQ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    header { padding: 1.5rem 2rem; border-bottom: 1px solid #1e293b; display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.25rem; font-weight: 600; color: #38bdf8; }
+    header span { font-size: 0.75rem; background: #1e3a5f; color: #7dd3fc; padding: 2px 8px; border-radius: 999px; }
+    main { padding: 2rem; max-width: 900px; margin: 0 auto; }
+    h2 { font-size: 1rem; font-weight: 500; color: #94a3b8; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.25rem; }
+    .card .label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
+    .card .value { font-size: 1.5rem; font-weight: 700; }
+    .card .change { font-size: 0.8rem; margin-top: 0.25rem; }
+    .up { color: #4ade80; } .down { color: #f87171; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.75rem; color: #64748b; padding: 0.5rem 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 0.875rem 1rem; border-top: 1px solid #1e293b; font-size: 0.9rem; }
+    tr:hover td { background: #1e293b; }
+    .ticker { font-weight: 600; color: #38bdf8; }
+    #status { font-size: 0.75rem; color: #64748b; margin-top: 2rem; }
+    #status a { color: #38bdf8; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FinanceIQ</h1>
+    <span>Berth Demo</span>
+  </header>
+  <main>
+    <div class="cards">
+      <div class="card">
+        <div class="label">Portfolio Value</div>
+        <div class="value">$142,830</div>
+        <div class="change up">+2.4% today</div>
+      </div>
+      <div class="card">
+        <div class="label">Day P&amp;L</div>
+        <div class="value up">+$3,348</div>
+        <div class="change up">+2.4%</div>
+      </div>
+      <div class="card">
+        <div class="label">Open Positions</div>
+        <div class="value">3</div>
+        <div class="change" style="color:#94a3b8">across 3 tickers</div>
+      </div>
+    </div>
+
+    <h2>Securities</h2>
+    <table id="securities">
+      <thead>
+        <tr><th>Ticker</th><th>Name</th><th>Price</th><th>Change</th></tr>
+      </thead>
+      <tbody><tr><td colspan="4" style="color:#475569">Loading from API…</td></tr></tbody>
+    </table>
+
+    <p id="status">API: <a id="api-link" href="#" target="_blank"></a></p>
+    <script>
+      const _apiHost = window.location.hostname.replace(/^app\./, 'api.');
+      const el = document.getElementById('api-link');
+      el.href = `https://${_apiHost}/health`;
+      el.textContent = `https://${_apiHost}/health`;
+    </script>
+  </main>
+
+  <script>
+    const apiBase = window.location.hostname.replace(/^app\./, 'api.');
+    fetch(`https://${apiBase}/api/securities`)
+      .then(r => r.json())
+      .then(({ data }) => {
+        const tbody = document.querySelector('#securities tbody');
+        tbody.innerHTML = data.map(s => `
+          <tr>
+            <td class="ticker">${s.ticker}</td>
+            <td>${s.name}</td>
+            <td>$${s.price.toFixed(2)}</td>
+            <td class="up">+1.2%</td>
+          </tr>`).join('');
+      })
+      .catch(() => {
+        document.querySelector('#securities tbody').innerHTML =
+          '<tr><td colspan="4" style="color:#f87171">Could not reach API — is berth up financeiq running?</td></tr>';
+      });
+  </script>
+</body>
+</html>

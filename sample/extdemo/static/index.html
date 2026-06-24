@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExtDemo — Berth</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem; }
+    h1 { font-size: 2rem; font-weight: 700; }
+    h1 span { color: #38bdf8; }
+    .badges { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .badge { padding: 0.5rem 1.25rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+    .badge.static { background: #164e63; color: #7dd3fc; }
+    .badge.external { background: #1e3a5f; color: #93c5fd; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem 2rem; max-width: 480px; width: 90%; }
+    .card h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 1rem; }
+    .card p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; }
+    a { color: #38bdf8; }
+    #api-status { margin-top: 0.75rem; font-size: 0.8rem; }
+    .ok { color: #4ade80; } .fail { color: #f87171; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Ext<span>Demo</span></h1>
+    <p style="color:#64748b;text-align:center;margin-top:0.5rem;font-size:0.85rem">Berth extensibility sample</p>
+  </div>
+
+  <div class="badges">
+    <span class="badge static">type: static</span>
+    <span class="badge external">type: external</span>
+  </div>
+
+  <div class="card">
+    <h2>This page</h2>
+    <p>
+      Served by <strong>nginx:alpine</strong> from the <code>static/</code> directory — no Dockerfile
+      required. Berth generates the container config automatically for <code>type: static</code> services.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>External API</h2>
+    <p>
+      The <code>api</code> service routes <a id="api-link" href="#" target="_blank"></a>
+      through Traefik to a process running directly on your host machine — no container.
+    </p>
+    <p id="api-status"></p>
+  </div>
+
+  <script>
+    const apiHost = window.location.hostname.replace(/^app\./, 'api.');
+    const apiUrl = `https://${apiHost}`;
+    const link = document.getElementById('api-link');
+    link.href = apiUrl;
+    link.textContent = apiUrl;
+
+    fetch(apiUrl)
+      .then(r => {
+        document.getElementById('api-status').innerHTML =
+          `<span class="ok">✓ Reachable (HTTP ${r.status})</span>`;
+      })
+      .catch(() => {
+        document.getElementById('api-status').innerHTML =
+          '<span class="fail">✗ Not reachable — start the host process first</span>';
+      });
+  </script>
+</body>
+</html>
