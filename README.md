@@ -13,9 +13,13 @@
 ### 2. Install Berth
 
 ```sh
-pipx install berth
-# or
-pip install berth
+pipx install git+https://github.com/AhmadDaghameen/Berth.git
+```
+
+Or pin to a release:
+
+```sh
+pipx install git+https://github.com/AhmadDaghameen/Berth.git@v0.1.0
 ```
 
 ### 3. Bootstrap
@@ -79,6 +83,6 @@ Once Berth is set up, the dashboard is available at `https://berth.test` (Phase 
 ## Phase roadmap
 
 - **Phase 1** ✅ Routing foundation: setup, register, up/down/status/open
-- **Phase 2** Multi-service projects, release management (deploy/rollback/history)
-- **Phase 3** Environments & dashboard
-- **Phase 4** Compose import, static/external service types, shared infra (Mailpit, Redis)
+- **Phase 2** ✅ Multi-service projects, release management (deploy/rollback/history)
+- **Phase 3** ✅ Environments & dashboard
+- **Phase 4** ✅ Compose import, static/external service types, shared infra (Mailpit, Redis)
